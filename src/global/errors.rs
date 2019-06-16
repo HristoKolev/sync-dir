@@ -17,6 +17,7 @@ pub enum CustomErrorKind {
     SystemTimeError(std::time::SystemTimeError),
     Failure(failure::Error),
     UserError(String),
+    NotifyError(notify::Error),
 }
 
 #[derive(Debug)]
@@ -39,6 +40,7 @@ impl fmt::Debug for CustomErrorKind {
             SystemTimeError(err) => return err.fmt(f),
             Failure(err) => return err.fmt(f),
             UserError(err) => return err.fmt(f),
+            NotifyError(err) => return err.fmt(f),
         };
     }
 }
@@ -57,6 +59,7 @@ impl ToString for CustomErrorKind {
             SystemTimeError(err) => return err.to_string(),
             Failure(err) => return err.to_string(),
             UserError(err) => return err.to_string(),
+            NotifyError(err) => return err.to_string(),
         }
     }
 }
@@ -97,6 +100,15 @@ impl From<serde_json::Error> for CustomError {
     fn from(err: serde_json::Error) -> Self {
         CustomError {
             kind: JsonError(err),
+            backtrace: Backtrace::new(),
+        }
+    }
+}
+
+impl From<notify::Error> for CustomError {
+    fn from(err: notify::Error) -> Self {
+        CustomError {
+            kind: NotifyError(err),
             backtrace: Backtrace::new(),
         }
     }
