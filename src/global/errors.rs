@@ -177,6 +177,15 @@ impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, std::collections::Has
     }
 }
 
+impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, bool>>> for CustomError {
+    fn from(err: std::sync::PoisonError<std::sync::MutexGuard<'_, bool>>) -> Self {
+        CustomError {
+            kind: PoisonedError(format!("{:#?}", err)),
+            backtrace: Backtrace::new(),
+        }
+    }
+}
+
 impl From<failure::Error> for CustomError {
     fn from(err: failure::Error) -> Self {
         CustomError {

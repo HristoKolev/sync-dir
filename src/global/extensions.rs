@@ -4,6 +4,7 @@ use super::prelude::*;
 use std::ffi::OsStr;
 use std::collections::HashMap;
 use std::hash::Hash;
+use std::ops::DerefMut;
 
 pub trait StrExtensions {
     fn last_index_of(&self, c: char) -> Option<usize>;
