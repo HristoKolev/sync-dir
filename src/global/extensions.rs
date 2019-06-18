@@ -4,7 +4,6 @@ use super::prelude::*;
 use std::ffi::OsStr;
 use std::collections::HashMap;
 use std::hash::Hash;
-use std::ops::DerefMut;
 
 pub trait StrExtensions {
     fn last_index_of(&self, c: char) -> Option<usize>;
@@ -240,6 +239,26 @@ pub trait IteratorExtensions: Iterator {
         }
 
         Ok(false)
+    }
+
+    fn map_result<K, F>(self, f: F) -> Result<::std::vec::IntoIter<K>>
+        where Self: Sized, F: Fn(&Self::Item) -> Result<K> {
+
+        let source: Vec<Self::Item> = self.collect();
+
+        let mut destination = Vec::new();
+
+        for item in source {
+
+            destination.push(f(&item)?);
+        }
+
+        Ok(destination.into_iter())
+    }
+
+    fn collect_vec(self) -> Vec<Self::Item> where Self: Sized {
+
+        self.collect()
     }
 }
 

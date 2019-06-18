@@ -16,6 +16,7 @@ impl CliRunner {
         }
     }
 
+    #[allow(unused)]
     pub fn command_config<F>(&self, f: F) -> ArgMatches
         where F: for<'a, 'b> FnOnce(App<'a, 'b>) -> App<'a, 'b> {
 
@@ -39,6 +40,7 @@ impl CliRunner {
         matches.get_matches_from(args)
     }
 
+    #[allow(unused)]
     pub fn register_command<F>(&self, command_name: &str, func: F) -> Result
         where F: Fn() -> Result + Send + Sync, F: 'static {
 
@@ -48,6 +50,7 @@ impl CliRunner {
         Ok(())
     }
 
+    #[allow(unused)]
     pub fn run(&self) -> Result {
 
         let command_name = ::std::env::args_os()

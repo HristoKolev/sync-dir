@@ -106,6 +106,14 @@ impl ConsoleAppender {
 
         Ok(())
     }
+
+    pub fn ewriteln(&self, message: &str) -> Result {
+
+        let stderr = &mut ::std::io::stderr();
+        write!(stderr, "{}\n", message)?;
+
+        Ok(())
+    }
 }
 
 pub struct InMemoryAppender {
@@ -169,6 +177,22 @@ impl Logger {
         Ok(())
     }
 
+    pub fn elog(&self, message: &str) -> Result {
+
+        let formatted_message = self.format_message(message)?;
+
+        let console_appender_result = self.console_appender.ewriteln(&formatted_message);
+        let in_memory_appender_result = self.in_memory_appender.add_entry(message);
+        let file_appender_result = self.file_appender.writeln(&formatted_message);
+
+        console_appender_result?;
+        in_memory_appender_result?;
+        file_appender_result?;
+
+        Ok(())
+    }
+
+    #[allow(unused)]
     pub fn get_logs(&self) -> Result<Vec<String>> {
 
         let logs = self.in_memory_appender.entries.lock()?;

@@ -32,3 +32,6 @@ strum = "0.15.0"
 strum_macros = "0.15.0"
 
 notify = "4.0.12"
+
+gitignore = "1.0.6"
+

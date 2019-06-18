@@ -6,6 +6,7 @@ pub struct FinStruct<TRes> {
 
 impl<TRes> FinStruct<TRes> {
 
+    #[allow(unused)]
     pub fn finally<FFinally>(self, ff: FFinally) -> Result<TRes>
         where FFinally : FnOnce() -> Result {
 
@@ -24,6 +25,7 @@ impl<TRes> FinStruct<TRes> {
     }
 }
 
+#[allow(unused)]
 pub fn run<FDo, TRes>(fdo: FDo) -> FinStruct<TRes>
     where FDo: FnOnce() -> Result<TRes> {
 
