@@ -19,6 +19,7 @@ pub enum CustomErrorKind {
     #[allow(unused)]
     UserError(String),
     NotifyError(notify::Error),
+    IgnoreError(ignore::Error),
 }
 
 #[derive(Debug)]
@@ -41,6 +42,7 @@ impl fmt::Debug for CustomErrorKind {
             SystemTimeError(err) => return err.fmt(f),
             UserError(err) => return err.fmt(f),
             NotifyError(err) => return err.fmt(f),
+            IgnoreError(err) => return err.fmt(f),
         };
     }
 }
@@ -59,6 +61,7 @@ impl ToString for CustomErrorKind {
             SystemTimeError(err) => return err.to_string(),
             UserError(err) => return err.to_string(),
             NotifyError(err) => return err.to_string(),
+            IgnoreError(err) => return err.to_string(),
         }
     }
 }
@@ -100,6 +103,15 @@ impl From<serde_json::Error> for CustomError {
     fn from(err: serde_json::Error) -> Self {
         CustomError {
             kind: JsonError(err),
+            backtrace: Backtrace::new(),
+        }
+    }
+}
+
+impl From<ignore::Error> for CustomError {
+    fn from(err: ignore::Error) -> Self {
+        CustomError {
+            kind: IgnoreError(err),
             backtrace: Backtrace::new(),
         }
     }

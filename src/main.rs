@@ -11,7 +11,7 @@ use std::thread::JoinHandle;
 use crate::global::prelude::*;
 
 use notify::{Watcher, RecursiveMode, watcher, DebouncedEvent};
-use std::path::{PathBuf};
+use std::path::{PathBuf, Path};
 
 fn main() {
     global::initialize();
@@ -40,13 +40,35 @@ fn main_result() -> Result {
 
     let flag = Arc::new(Mutex::new(false));
 
+    let syncignore_path = Path::new(&source_path).join(".syncignore");
+
+    let syncignore = if syncignore_path.exists() {
+
+        let (ignore, opt_err) = ::ignore::gitignore::Gitignore::new(syncignore_path);
+
+        Some(match opt_err {
+            Some(x) => Err(x),
+            None => Ok(ignore)
+        }?)
+    } else {
+        None
+    };
+
     let watch_flag = flag.clone();
 
     let watch_thread: JoinHandle<Result> = ::std::thread::spawn(move || {
 
         loop {
             match receiver.recv() {
-                Ok(_event) => {
+                Ok(event) => {
+
+                    if let Some(path) = event.get_path() {
+                        if let Some(syncignore) = &syncignore {
+                            if syncignore.matched(&path, path.is_dir()).is_ignore() {
+                                continue;
+                            }
+                        }
+                    }
 
                     let mut value = watch_flag.lock()?;
                     *value = true;
