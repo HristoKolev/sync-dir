@@ -11,7 +11,7 @@ use std::thread::JoinHandle;
 use crate::global::prelude::*;
 
 use notify::{Watcher, RecursiveMode, watcher, DebouncedEvent};
-use std::path::{PathBuf, Path};
+use std::path::{PathBuf};
 
 fn main() {
     global::initialize();
@@ -33,14 +33,6 @@ fn main_result() -> Result {
     let source_path = args[0].clone();
     let destination_path = args[1].clone();
 
-    let sync_ignore_path = Path::new(&source_path);
-
-    let ignore = if sync_ignore_path.exists() {
-        Some(gitignore::File::new(sync_ignore_path)?)
-    } else {
-        None
-    };
-
     let (sender, receiver) = channel();
 
     let mut watcher = watcher(sender, Duration::from_millis(100))?;
@@ -54,16 +46,7 @@ fn main_result() -> Result {
 
         loop {
             match receiver.recv() {
-                Ok(event) => {
-                    match event.get_path() {
-                        Some(path) => {
-                            match ignore {
-
-
-                            }
-                        },
-                        None => (),
-                    };
+                Ok(_event) => {
 
                     let mut value = watch_flag.lock()?;
                     *value = true;
@@ -84,7 +67,12 @@ fn main_result() -> Result {
 
             if *value {
 
-                bash_exec!("rsync -aP {} {}", source_path, destination_path);
+                bash_exec!(
+                    r##"rsync -aP --exclude='/.git' --filter="dir-merge,- .syncignore" {} {}"##,
+                    source_path,
+                    destination_path
+                );
+
                 *value = false;
             }
         }

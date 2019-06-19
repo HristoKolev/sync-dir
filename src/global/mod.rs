@@ -10,7 +10,6 @@ pub mod prelude;
 #[macro_use]
 pub mod bash_shell;
 pub mod do_try;
-pub mod cli;
 
 use std::path::PathBuf;
 use chrono::{DateTime, Utc};
@@ -21,7 +20,6 @@ use self::app_config::{AppConfig, read_config};
 use self::custom_sentry_client::CustomSentryClient;
 use self::error_handler::handle_error;
 use self::logging::*;
-use self::cli::CliRunner;
 
 static APP_CONFIG_FILE_NAME: &str = "app-config.json";
 static LOG_FILE_NAME: &str = "log/log.txt";
@@ -34,7 +32,6 @@ pub struct Global {
     pub logger: Logger,
     pub config_directory: PathBuf,
     pub app_start_time: DateTime<Utc>,
-    pub cli: CliRunner,
 }
 
 /// Error wrapper of the global object builder.
@@ -49,7 +46,7 @@ fn create_global_result() -> Result<Global> {
 
     let config_directory = std::env::current_exe()?.get_directory();
 
-    let config_file_path = config_directory.combine_with(APP_CONFIG_FILE_NAME);
+    let config_file_path = config_directory.join(APP_CONFIG_FILE_NAME);
 
     if !config_file_path.exists() {
         eprintln!("The `{}` file is missing.", APP_CONFIG_FILE_NAME);
@@ -60,7 +57,7 @@ fn create_global_result() -> Result<Global> {
 
     let sentry = CustomSentryClient::new(&app_config.sentry_dsn)?;
 
-    let log_file_path = config_directory.combine_with(LOG_FILE_NAME);
+    let log_file_path = config_directory.join(LOG_FILE_NAME);
 
     let logger = Logger::new(LoggingConfiguration {
         max_length: LOG_FILE_MAX_LENGTH,
@@ -73,7 +70,6 @@ fn create_global_result() -> Result<Global> {
         logger,
         config_directory,
         app_start_time: Utc::now(),
-        cli: CliRunner::new()
     })
 }
 
@@ -136,12 +132,6 @@ pub fn logger() -> &'static Logger {
 pub fn app_start_time() -> &'static DateTime<Utc> {
 
     &INSTANCE.app_start_time
-}
-
-#[allow(unused)]
-pub fn cli() -> &'static CliRunner {
-
-    &INSTANCE.cli
 }
 
 #[allow(unused_macros)]

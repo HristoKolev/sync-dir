@@ -49,7 +49,6 @@ pub trait PathExtensions {
     fn file_name_as_string(&self) -> Result<String>;
     fn get_directory_as_string(&self) -> Result<String>;
     fn get_directory(&self) -> PathBuf;
-    fn combine_with(&self, p: &str) -> PathBuf;
     fn create_directory(&self) -> Result<PathBuf>;
 }
 
@@ -99,15 +98,6 @@ impl PathExtensions for Path {
         let mut copy = self.to_path_buf();
 
         copy.pop();
-
-        copy
-    }
-
-    fn combine_with(&self, p: &str) -> PathBuf {
-
-        let mut copy = self.to_path_buf();
-
-        copy.push(p);
 
         copy
     }

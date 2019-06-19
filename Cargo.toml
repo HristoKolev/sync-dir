@@ -20,18 +20,10 @@ regex = "1.1.6"
 
 chrono = "0.4.6"
 
-failure = "0.1.5"
-
-uuid = "0.7"
-
 clap = "2.33.0"
 
 time = "0.1"
 
-strum = "0.15.0"
-strum_macros = "0.15.0"
-
 notify = "4.0.12"
 
-gitignore = "1.0.6"
-
+ignore = "0.4"

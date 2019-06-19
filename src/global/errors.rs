@@ -15,7 +15,8 @@ pub enum CustomErrorKind {
     UrlParseError(url::ParseError),
     ReqwestError(reqwest::Error),
     SystemTimeError(std::time::SystemTimeError),
-    Failure(failure::Error),
+
+    #[allow(unused)]
     UserError(String),
     NotifyError(notify::Error),
 }
@@ -38,7 +39,6 @@ impl fmt::Debug for CustomErrorKind {
             UrlParseError(err) => return err.fmt(f),
             ReqwestError(err) => return err.fmt(f),
             SystemTimeError(err) => return err.fmt(f),
-            Failure(err) => return err.fmt(f),
             UserError(err) => return err.fmt(f),
             NotifyError(err) => return err.fmt(f),
         };
@@ -57,7 +57,6 @@ impl ToString for CustomErrorKind {
             UrlParseError(err) => return err.to_string(),
             ReqwestError(err) => return err.to_string(),
             SystemTimeError(err) => return err.to_string(),
-            Failure(err) => return err.to_string(),
             UserError(err) => return err.to_string(),
             NotifyError(err) => return err.to_string(),
         }
@@ -72,6 +71,7 @@ impl CustomError {
         }
     }
 
+    #[allow(unused)]
     pub fn user_error(message: &str) -> CustomError {
         CustomError {
             kind: UserError(message.to_string()),
@@ -181,15 +181,6 @@ impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, bool>>> for CustomErr
     fn from(err: std::sync::PoisonError<std::sync::MutexGuard<'_, bool>>) -> Self {
         CustomError {
             kind: PoisonedError(format!("{:#?}", err)),
-            backtrace: Backtrace::new(),
-        }
-    }
-}
-
-impl From<failure::Error> for CustomError {
-    fn from(err: failure::Error) -> Self {
-        CustomError {
-            kind: Failure(err),
             backtrace: Backtrace::new(),
         }
     }
