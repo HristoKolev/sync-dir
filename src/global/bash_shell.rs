@@ -89,6 +89,7 @@ pub struct CommandResult {
 impl CommandResult {
 
     //noinspection RsSelfConvention
+    #[allow(unused)]
     pub fn as_result(self) -> Result<CommandResult> {
         if self.success {
             Ok(self)

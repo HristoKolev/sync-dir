@@ -30,8 +30,18 @@ fn main_result() -> Result {
         ::std::process::exit(1);
     }
 
+    let ssh_key_path = if args.len() >= 2 {Some(args[2].clone())} else {None};
+
     let source_path = args[0].clone();
     let destination_path = args[1].clone();
+
+    log!("Syncing ... {} to {}", source_path, destination_path);
+
+    sync_directory(
+        &source_path,
+        &destination_path,
+        ssh_key_path.as_ref().map(String::as_str)
+    )?;
 
     let (sender, receiver) = channel();
 
@@ -89,11 +99,11 @@ fn main_result() -> Result {
 
             if *value {
 
-                bash_exec!(
-                    r##"rsync -aP --exclude='/.git' --filter="dir-merge,- .syncignore" {} {}"##,
-                    source_path,
-                    destination_path
-                );
+                sync_directory(
+                    &source_path,
+                    &destination_path,
+                    ssh_key_path.as_ref().map(String::as_str)
+                )?;
 
                 *value = false;
             }
@@ -105,6 +115,27 @@ fn main_result() -> Result {
 
     sync_thread.join().replace_error(||
         CustomError::from_message("The sync thread failed for some reason."))??;
+
+    Ok(())
+}
+
+fn sync_directory(source_path: &str, destination_path: &str, ssh_key_file: Option<&str>) -> Result {
+
+    let ssh_key_command = ssh_key_file
+        .map(|x| format!(r##"-e "ssh -i {}""##, x))
+        .unwrap_or("".to_string());
+
+    let result = crate::global::bash_shell::exec(&format!(
+        r##"rsync -aP --exclude='/.git' --filter="dir-merge,- .syncignore" {} {} {}"##,
+        ssh_key_command,
+        source_path,
+        destination_path
+    ));
+
+    match result {
+        Ok(_) => (),
+        Err(err) => elog!("{:#?}", err)
+    }
 
     Ok(())
 }
