@@ -7,11 +7,11 @@ use std::sync::mpsc::channel;
 use std::time::Duration;
 use std::sync::{Mutex, Arc};
 use std::thread::JoinHandle;
-
-use crate::global::prelude::*;
+use std::path::{PathBuf, Path};
 
 use notify::{Watcher, RecursiveMode, watcher, DebouncedEvent};
-use std::path::{PathBuf, Path};
+
+use crate::global::prelude::*;
 
 fn main() {
     global::initialize();
