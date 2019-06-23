@@ -80,7 +80,13 @@ fn main_result() -> Result {
                         }
                     }
 
+                    if let Some(path) = event.get_path() {
+
+                        log!("Change: {}", path.get_as_string()?);
+                    }
+
                     let mut value = watch_flag.lock()?;
+
                     *value = true;
                 },
                 Err(error) => elog!("{:#?}", error),
@@ -122,7 +128,7 @@ fn main_result() -> Result {
 fn sync_directory(source_path: &str, destination_path: &str, ssh_key_file: Option<&str>) -> Result {
 
     let result = crate::global::bash_shell::exec(&format!(
-        r##"rsync -aP --exclude='/.git' --filter="dir-merge,- .syncignore" -e "ssh {} -o StrictHostKeyChecking=no" {} {}"##,
+        r##"rsync -aP --delete --exclude='/.git' --filter="dir-merge,- .syncignore" -e "ssh {} -o StrictHostKeyChecking=no" {} {}"##,
         ssh_key_file.map(|x | format!("-i {}", x)).unwrap_or("".to_string()),
         source_path,
         destination_path
