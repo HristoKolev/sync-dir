@@ -127,14 +127,28 @@ fn main_result() -> Result {
 
 fn sync_directory(source_path: &str, destination_path: &str, ssh_key_file: Option<&str>) -> Result {
 
-    let result = crate::global::bash_shell::exec(&format!(
+    if destination_path.contains(":") {
+
+        let path = destination_path.split(':').collect_vec()[1];
+        let remote = destination_path.split(':').collect_vec()[0];
+
+        match crate::global::bash_shell::exec(&format!(
+            r##"ssh {} {} -o StrictHostKeyChecking=no 'mkdir -p {}'"##,
+            remote,
+            ssh_key_file.map(|x | format!("-i {}", x)).unwrap_or("".to_string()),
+            path
+        )) {
+            Ok(_) => (),
+            Err(err) => elog!("{:#?}", err)
+        }
+    }
+
+    match crate::global::bash_shell::exec(&format!(
         r##"rsync -aP --delete --exclude='/.git' --filter="dir-merge,- .syncignore" -e "ssh {} -o StrictHostKeyChecking=no" {} {}"##,
         ssh_key_file.map(|x | format!("-i {}", x)).unwrap_or("".to_string()),
         source_path,
         destination_path
-    ));
-
-    match result {
+    )) {
         Ok(_) => (),
         Err(err) => elog!("{:#?}", err)
     }
