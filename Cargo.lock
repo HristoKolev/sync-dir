@@ -1341,7 +1341,7 @@ dependencies = [
 
 [[package]]
 name = "sync-dir"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "backtrace 0.3.30 (registry+https://github.com/rust-lang/crates.io-index)",
  "chrono 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",

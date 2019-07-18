@@ -127,28 +127,32 @@ fn main_result() -> Result {
 
 fn sync_directory(source_path: &str, destination_path: &str, ssh_key_file: Option<&str>) -> Result {
 
-//    if destination_path.contains(":") {
-//
-//        let path = destination_path.split(':').collect_vec()[1];
-//        let remote = destination_path.split(':').collect_vec()[0];
-//
-//        match crate::global::bash_shell::exec(&format!(
-//            r##"ssh {} {} -o StrictHostKeyChecking=no 'mkdir -p {}'"##,
-//            remote,
-//            ssh_key_file.map(|x | format!("-i {}", x)).unwrap_or("".to_string()),
-//            path
-//        )) {
-//            Ok(_) => (),
-//            Err(err) => elog!("{:#?}", err)
-//        }
-//    }
+    if destination_path.contains(":") {
 
-    match crate::global::bash_shell::exec(&format!(
+        let path = destination_path.split(':').collect_vec()[1];
+        let remote = destination_path.split(':').collect_vec()[0];
+
+        let mkdir_command = &format!(
+            "ssh -n -o StrictHostKeyChecking=no {} {} 'mkdir -p {}'",
+            ssh_key_file.map(|x | format!("-i {}", x)).unwrap_or("".to_string()),
+            remote,
+            path
+        );
+
+        match crate::global::bash_shell::exec(mkdir_command) {
+            Ok(_) => (),
+            Err(err) => elog!("{:#?}", err)
+        }
+    }
+
+    let sync_command = &format!(
         r##"rsync -aP --delete --exclude='/.git' --filter="dir-merge,- .syncignore" -e "ssh {} -o StrictHostKeyChecking=no" {} {}"##,
         ssh_key_file.map(|x | format!("-i {}", x)).unwrap_or("".to_string()),
         source_path,
         destination_path
-    )) {
+    );
+
+    match crate::global::bash_shell::exec(sync_command) {
         Ok(_) => (),
         Err(err) => elog!("{:#?}", err)
     }
